@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+langchain
+langgraph
+langchain-google-genai
+langchain-huggingface
+pydantic>=2.0
+pydantic-settings
+tenacity
+python-dotenv
