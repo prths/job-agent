@@ -1,14 +1,24 @@
-fastapi
-uvicorn
-streamlit
-langchain
-langgraph
-langchain-google-genai
-pydantic
-requests
-python-dotenv
-tenacity
+# Core
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+readability-lxml>=0.8.1
 
+# Resume & JD parsing
+pdfplumber>=0.11.0
+PyMuPDF>=1.23.0
+python-docx>=1.1.0
+
+# LLM / Agents (adjust if already used)
+langchain>=0.2.0
+langgraph>=0.2.0
+langchain-google-genai>=1.0.0
+
+# UI (if using Streamlit)
+streamlit>=1.32.0
+
+# Utilities
+pydantic>=2.6.0
+tqdm>=4.66.0
 
 
 
