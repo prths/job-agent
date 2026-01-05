@@ -74,43 +74,43 @@ if st.button("🔍 Run Matching"):
         st.json(llm_result)
 
         # ---------- HYBRID SCORE ----------
-	embedding_score = ranking[0][1]          # FAISS score (0–1)
-	llm_score = llm_result["fit_score"]      # LLM score (0–100)
-
-	final_score = fuse_scores(embedding_score, llm_score)
-
-	st.subheader("📈 Final Hybrid Score")
-	st.metric(
-	label="Overall Fit (Hybrid)",
-	value=f"{final_score}/100")
-
-	# ---------- SKILL GAP ANALYSIS ----------
-	st.subheader("🧩 Skill Gap Analysis")
-
-	missing_skills = llm_result.get("missing_skills", [])
-
-	if missing_skills:
-	    st.warning("Skills / areas to improve for this role:")
-	    for skill in missing_skills:
-	        st.write(f"• {skill}")
-	else:
-	    st.success("No major skill gaps identified 🎯")
-
-
-        
-     st.subheader("✉️ Cover Letter")
-
-     if st.button("Generate Cover Letter"):
-         with st.spinner("Generating cover letter..."):
-             cover_letter = generate_cover_letter(
-                 jd_content,
-                 best_resume_text,
-                 llm_result
-                 )
-
-         st.text_area(
-             "Generated Cover Letter",
-             cover_letter,
-             height=350)
-    
+		embedding_score = ranking[0][1]          # FAISS score (0–1)
+		llm_score = llm_result["fit_score"]      # LLM score (0–100)
+	
+		final_score = fuse_scores(embedding_score, llm_score)
+	
+		st.subheader("📈 Final Hybrid Score")
+		st.metric(
+		label="Overall Fit (Hybrid)",
+		value=f"{final_score}/100")
+	
+		# ---------- SKILL GAP ANALYSIS ----------
+		st.subheader("🧩 Skill Gap Analysis")
+	
+		missing_skills = llm_result.get("missing_skills", [])
+	
+		if missing_skills:
+		    st.warning("Skills / areas to improve for this role:")
+		    for skill in missing_skills:
+		        st.write(f"• {skill}")
+		else:
+		    st.success("No major skill gaps identified 🎯")
+	
+	
+	        
+	     st.subheader("✉️ Cover Letter")
+	
+	     if st.button("Generate Cover Letter"):
+	         with st.spinner("Generating cover letter..."):
+	             cover_letter = generate_cover_letter(
+	                 jd_content,
+	                 best_resume_text,
+	                 llm_result
+	                 )
+	
+	         st.text_area(
+	             "Generated Cover Letter",
+	             cover_letter,
+	             height=350)
+	    
 
