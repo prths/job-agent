@@ -6,7 +6,7 @@ from utils.resume_loader import load_resume
 from services.embedding_matcher import SemanticMatcher
 from services.cover_letter import generate_cover_letter
 from services.llm_matcher import llm_match
-from services.score_fusion import fuse_scores
+from services.fusion import fuse_scores
 
 st.set_page_config(page_title="Job Application Agent", layout="centered")
 st.title("🧠 AI Job Application Agent")
