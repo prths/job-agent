@@ -66,45 +66,45 @@ if st.button("🔍 Run Matching"):
     st.subheader("🏆 Best Resume")
     st.write(f"**{best_resume_name}**")
 
-    # ---------------- LLM ANALYSIS ----------------
-    if st.button("🤖 Analyze Best Resume"):
-        with st.spinner("Running LLM evaluation..."):
-            llm_result = llm_match(jd_content, best_resume_text)
+# ---------------- LLM ANALYSIS ----------------
+if st.button("🤖 Analyze Best Resume"):
+with st.spinner("Running LLM evaluation..."):
+    llm_result = llm_match(jd_content, best_resume_text)
 
-        st.subheader("🧠 LLM Match Analysis")
-        st.json(llm_result)
+st.subheader("🧠 LLM Match Analysis")
+st.json(llm_result)
 
-        # ---------- HYBRID SCORE ----------
-        embedding_score = ranking[0][1]        # 0–1
-        llm_score = llm_result["fit_score"]    # 0–100
+# ---------- HYBRID SCORE ----------
+embedding_score = ranking[0][1]        # 0–1
+llm_score = llm_result["fit_score"]    # 0–100
 
-        final_score = fuse_scores(embedding_score, llm_score)
+final_score = fuse_scores(embedding_score, llm_score)
 
-        st.subheader("📈 Final Hybrid Score")
-        st.metric("Overall Fit", f"{final_score}/100")
+st.subheader("📈 Final Hybrid Score")
+st.metric("Overall Fit", f"{final_score}/100")
 
-        # ---------- SKILL GAP ----------
-        st.subheader("🧩 Skill Gap Analysis")
-        missing_skills = llm_result.get("missing_skills", [])
+# ---------- SKILL GAP ----------
+st.subheader("🧩 Skill Gap Analysis")
+missing_skills = llm_result.get("missing_skills", [])
 
-        if missing_skills:
-            st.warning("Skills / areas to improve:")
-            for skill in missing_skills:
-                st.write(f"• {skill}")
-        else:
-            st.success("No major skill gaps identified 🎯")
+if missing_skills:
+    st.warning("Skills / areas to improve:")
+    for skill in missing_skills:
+        st.write(f"• {skill}")
+else:
+    st.success("No major skill gaps identified 🎯")
 
-        # ---------- COVER LETTER ----------
-        if st.button("✉️ Generate Cover Letter"):
-            with st.spinner("Generating cover letter..."):
-                cover_letter = generate_cover_letter(
-                    jd_content,
-                    best_resume_text,
-                    llm_result
-                )
+# ---------- COVER LETTER ----------
+if st.button("✉️ Generate Cover Letter"):
+    with st.spinner("Generating cover letter..."):
+        cover_letter = generate_cover_letter(
+            jd_content,
+            best_resume_text,
+            llm_result
+        )
 
-            st.text_area(
-                "Generated Cover Letter",
-                cover_letter,
-                height=350
-            )
+    st.text_area(
+        "Generated Cover Letter",
+        cover_letter,
+        height=350
+    )
