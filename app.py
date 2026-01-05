@@ -34,77 +34,87 @@ if st.button("🔍 Run Matching"):
         st.error("Please upload at least one resume.")
         st.stop()
 
-    # ---- Load JD ----
     with st.spinner("Loading job description..."):
-        jd_content = load_jd(
+        st.session_state.jd_content = load_jd(
             jd_url=jd_url if jd_url else None,
             jd_text=jd_text if jd_text else None
         )
 
-    # ---- Load resumes ----
     resumes = {}
     for file in uploaded_files:
         with tempfile.NamedTemporaryFile(delete=False, suffix=file.name) as tmp:
             tmp.write(file.read())
             resumes[file.name] = load_resume(tmp.name)
 
-    # ---- Semantic matching ----
     with st.spinner("Running semantic matching..."):
         matcher = SemanticMatcher()
-        ranking = matcher.rank_resumes(jd_content, resumes)
+        st.session_state.ranking = matcher.rank_resumes(
+            st.session_state.jd_content,
+            resumes
+        )
+        st.session_state.resumes = resumes
 
     st.success("Matching complete!")
 
-    # ---------------- RESULTS ----------------
+# ---------------- SHOW MATCHING RESULTS ----------------
+if "ranking" in st.session_state:
     st.subheader("📊 Resume Ranking")
-    for name, score in ranking:
+    for name, score in st.session_state.ranking:
         st.write(f"**{name}** → {score:.3f}")
 
-    best_resume_name = ranking[0][0]
-    best_resume_text = resumes[best_resume_name]
+    best_resume_name = st.session_state.ranking[0][0]
+    st.session_state.best_resume_text = st.session_state.resumes[best_resume_name]
 
     st.subheader("🏆 Best Resume")
     st.write(f"**{best_resume_name}**")
 
 # ---------------- LLM ANALYSIS ----------------
-if st.button("🤖 Analyze Best Resume"):
-with st.spinner("Running LLM evaluation..."):
-    llm_result = llm_match(jd_content, best_resume_text)
+if "best_resume_text" in st.session_state:
+    if st.button("🤖 Analyze Best Resume"):
+        with st.spinner("Running LLM evaluation..."):
+            st.session_state.llm_result = llm_match(
+                st.session_state.jd_content,
+                st.session_state.best_resume_text
+            )
 
-st.subheader("🧠 LLM Match Analysis")
-st.json(llm_result)
+# ---------------- SHOW LLM RESULTS ----------------
+if "llm_result" in st.session_state:
+    llm_result = st.session_state.llm_result
 
-# ---------- HYBRID SCORE ----------
-embedding_score = ranking[0][1]        # 0–1
-llm_score = llm_result["fit_score"]    # 0–100
+    st.subheader("🧠 LLM Match Analysis")
+    st.json(llm_result)
 
-final_score = fuse_scores(embedding_score, llm_score)
+    embedding_score = st.session_state.ranking[0][1]
+    llm_score = llm_result["fit_score"]
 
-st.subheader("📈 Final Hybrid Score")
-st.metric("Overall Fit", f"{final_score}/100")
+    final_score = fuse_scores(embedding_score, llm_score)
 
-# ---------- SKILL GAP ----------
-st.subheader("🧩 Skill Gap Analysis")
-missing_skills = llm_result.get("missing_skills", [])
+    st.subheader("📈 Final Hybrid Score")
+    st.metric("Overall Fit", f"{final_score}/100")
 
-if missing_skills:
-    st.warning("Skills / areas to improve:")
-    for skill in missing_skills:
-        st.write(f"• {skill}")
-else:
-    st.success("No major skill gaps identified 🎯")
+    # ---------- SKILL GAP ----------
+    st.subheader("🧩 Skill Gap Analysis")
+    missing_skills = llm_result.get("missing_skills", [])
 
-# ---------- COVER LETTER ----------
-if st.button("✉️ Generate Cover Letter"):
-    with st.spinner("Generating cover letter..."):
-        cover_letter = generate_cover_letter(
-            jd_content,
-            best_resume_text,
-            llm_result
+    if missing_skills:
+        st.warning("Skills / areas to improve:")
+        for skill in missing_skills:
+            st.write(f"• {skill}")
+    else:
+        st.success("No major skill gaps identified 🎯")
+
+# ---------------- COVER LETTER ----------------
+if "llm_result" in st.session_state:
+    if st.button("✉️ Generate Cover Letter"):
+        with st.spinner("Generating cover letter..."):
+            cover_letter = generate_cover_letter(
+                st.session_state.jd_content,
+                st.session_state.best_resume_text,
+                st.session_state.llm_result
+            )
+
+        st.text_area(
+            "Generated Cover Letter",
+            cover_letter,
+            height=350
         )
-
-    st.text_area(
-        "Generated Cover Letter",
-        cover_letter,
-        height=350
-    )
