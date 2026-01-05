@@ -68,6 +68,25 @@ if "ranking" in st.session_state:
     st.subheader("🏆 Best Resume")
     st.write(f"**{best_resume_name}**")
 
+# ---------------- LLM ANALYSIS (CANDIDATE-WISE) ----------------
+if "ranking" in st.session_state:
+    if st.button("🤖 Analyze All Candidates"):
+        st.session_state.llm_results = {}
+
+        with st.spinner("Running LLM evaluation for all candidates..."):
+            for name, _ in st.session_state.ranking:
+                resume_text = st.session_state.resumes[name]
+
+                llm_result = llm_match(
+                    st.session_state.jd_content,
+                    resume_text
+                )
+
+                st.session_state.llm_results[name] = llm_result
+
+        st.success("Candidate-wise analysis complete!")
+
+
 # ---------------- LLM ANALYSIS ----------------
 if "best_resume_text" in st.session_state:
     if st.button("🤖 Analyze Best Resume"):
@@ -77,31 +96,45 @@ if "best_resume_text" in st.session_state:
                 st.session_state.best_resume_text
             )
 
-# ---------------- SHOW LLM RESULTS ----------------
-if "llm_result" in st.session_state:
-    llm_result = st.session_state.llm_result
+# ---------------- CANDIDATE-WISE ANALYSIS ----------------
+if "llm_results" in st.session_state:
+    st.subheader("🧑‍💼 Candidate-wise Strengths & Weaknesses")
 
-    st.subheader("🧠 LLM Match Analysis")
-    st.json(llm_result)
+    for name, llm_result in st.session_state.llm_results.items():
+        with st.expander(f"📄 {name}", expanded=False):
 
-    embedding_score = st.session_state.ranking[0][1]
-    llm_score = llm_result["fit_score"]
+            embedding_score = dict(st.session_state.ranking).get(name, 0)
+            llm_score = llm_result.get("fit_score", 0)
+            final_score = fuse_scores(embedding_score, llm_score)
 
-    final_score = fuse_scores(embedding_score, llm_score)
+            st.metric("Overall Fit Score", f"{final_score}/100")
 
-    st.subheader("📈 Final Hybrid Score")
-    st.metric("Overall Fit", f"{final_score}/100")
+            # -------- Strengths --------
+            st.markdown("### ✅ Strengths")
+            strengths = llm_result.get("strengths", [])
+            if strengths:
+                for s in strengths:
+                    st.write(f"• {s}")
+            else:
+                st.write("No major strengths identified.")
 
-    # ---------- SKILL GAP ----------
-    st.subheader("🧩 Skill Gap Analysis")
-    missing_skills = llm_result.get("missing_skills", [])
+            # -------- Weaknesses --------
+            st.markdown("### ⚠️ Weaknesses")
+            weaknesses = llm_result.get("weaknesses", [])
+            if weaknesses:
+                for w in weaknesses:
+                    st.write(f"• {w}")
+            else:
+                st.write("No major weaknesses identified.")
 
-    if missing_skills:
-        st.warning("Skills / areas to improve:")
-        for skill in missing_skills:
-            st.write(f"• {skill}")
-    else:
-        st.success("No major skill gaps identified 🎯")
+            # -------- Missing Skills --------
+            st.markdown("### 🧩 Skill Gaps")
+            missing = llm_result.get("missing_skills", [])
+            if missing:
+                for m in missing:
+                    st.write(f"• {m}")
+            else:
+                st.success("No critical skill gaps 🎯")
 
 # ---------------- COVER LETTER ----------------
 if "llm_result" in st.session_state:
