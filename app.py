@@ -68,23 +68,23 @@ if "ranking" in st.session_state:
     st.subheader("🏆 Best Resume")
     st.write(f"**{best_resume_name}**")
 
-# ---------------- LLM ANALYSIS (CANDIDATE-WISE) ----------------
-if "ranking" in st.session_state:
-    if st.button("🤖 Analyze All Candidates"):
-        st.session_state.llm_results = {}
+# # ---------------- LLM ANALYSIS (CANDIDATE-WISE) ----------------
+# if "ranking" in st.session_state:
+#     if st.button("🤖 Analyze All Candidates"):
+#         st.session_state.llm_results = {}
 
-        with st.spinner("Running LLM evaluation for all candidates..."):
-            for name, _ in st.session_state.ranking:
-                resume_text = st.session_state.resumes[name]
+#         with st.spinner("Running LLM evaluation for all candidates..."):
+#             for name, _ in st.session_state.ranking:
+#                 resume_text = st.session_state.resumes[name]
 
-                llm_result = llm_match(
-                    st.session_state.jd_content,
-                    resume_text
-                )
+#                 llm_result = llm_match(
+#                     st.session_state.jd_content,
+#                     resume_text
+#                 )
 
-                st.session_state.llm_results[name] = llm_result
+#                 st.session_state.llm_results[name] = llm_result
 
-        st.success("Candidate-wise analysis complete!")
+#         st.success("Candidate-wise analysis complete!")
 
 
 # ---------------- LLM ANALYSIS ----------------
